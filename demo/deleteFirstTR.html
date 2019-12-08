@@ -1,0 +1,44 @@
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<table id="test-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+	<tbody></tbody>
+</table>
+<button id="test-add-button">Add</button>
+<button onclick="deleteFirstTR()">Delete</button>
+
+<script>
+'use strict';
+
+$(function () {
+    var trs = [['Bart Simpson', 'bart.s@primary.school', 'Springfield', 'Active'],
+               ['Michael Scofield', 'm.scofield@escape.org', 'Fox River', 'Locked'],
+               ['Optimus Prime', 'prime@cybertron.org', 'Cybertron', 'Active'],
+               ['Peter Parker', 'spider@movie.org', 'New York', 'Active'],
+               ['Thor Odinson', 'thor@asgard.org', 'Asgard', 'Active']];
+    var tbody = $('#test-table>tbody');
+    var i;
+    for (i=0; i < trs.length; i++) {
+        tbody.append('<tr><td>' + trs[i].join('</td><td>') + '</td></tr>');
+    }
+    i = 0;
+    $('#test-add-button').click(function () {
+        if (i>=trs.length) {
+            i = 0;
+        }
+        tbody.append('<tr><td>' + trs[i].join('</td><td>') + '</td></tr>');
+        i++;
+    });
+});
+function deleteFirstTR() {
+    var tr = $('#test-table>tbody>tr:visible').first();
+    tr.fadeOut(600, ()=>tr.remove());
+}
+</script>

@@ -1,0 +1,129 @@
+<canvas id="stock-canvas" width="1024" height="320" style="border: 1px solid #ccc; margin-top: 15px;">
+</canvas>
+<script>
+'use strict';
+window.loadStockData = function (r) {
+    var
+        NUMS = 30,
+        data = r.data;
+    if (data.length > NUMS) {
+        data = data.slice(data.length - NUMS);
+    }
+    data = data.map(function (x) {
+        return {
+            date: x[0],
+            open: x[1],
+            close: x[2],
+            high: x[3],
+            low: x[4],
+            vol: x[5],
+            change: x[6]
+        };
+    });
+    window.drawStock(data);
+}
+window.drawStock = function (data) {
+	var
+		canvas = document.getElementById('stock-canvas'),
+		ctx = canvas.getContext('2d'),
+		width = canvas.width,
+		height = canvas.height,
+		xLength = data.length, // X轴长度（0~29）
+		yLength = 6, // Y轴长度（3000, 3200, 3400, 3600, 3800, 4000）
+		margin = 30, // 边距（像素），预留给X\Y轴的刻度、文字
+		lineWidth = 1, // 线条的宽度（像素）
+		rectWidth = 10, // 矩形的宽度（像素）
+		xInterval = 20, // X轴上每个刻度之间的间距（像素）
+		yInterval = 50, // Y轴上每个刻度之间的间距（像素）
+		scaleLineColor = 'gray', // 图表刻度线颜色
+		sunLineColor = 'red', //阳线颜色
+		shadeLineColor = 'green', //阴线颜色
+		origin_x = margin, // 原点x坐标
+		origin_y = height - margin, // 原点y坐标
+		xMax_x = margin + (xLength - 1) * xInterval, // x轴最大刻度x坐标
+		xMax_y = origin_y, // x轴最大刻度y坐标
+		yMax_x = origin_x, // y轴最大刻度x坐标
+		yMax_y = height - margin - (yLength - 1) * yInterval; // y轴最大刻度y坐标
+	//maxHigh = data.reduce((pre, cur) => pre > cur.high ? pre : cur.high), //
+	//minLow = data.reduce((pre, cur) => pre < cur.low ? pre : cur.low);
+	console.log(JSON.stringify(data, null, '    '));
+	console.log('width: ' + width + ', height: ' + height);
+	console.log('origin: (' + origin_x + ',' + origin_y + '), xMax: (' + xMax_x + ',' + xMax_y + '), yMax: (' + yMax_x + ',' + yMax_y + ')');
+	//console.log('maxHigh: ' + maxHigh + ', minLow: ' + minLow);
+	if (xMax_x > width || yMax_y > height) {
+		console.log('Canvas尺寸不足！');
+		return null;
+	}
+	ctx.clearRect(0, 0, width, height); //清空
+	ctx.font = '10px Aral';
+	// 绘制X轴：坐标线、刻度线、刻度值
+	drawLine(ctx, origin_x, origin_y, xMax_x, xMax_y, lineWidth, scaleLineColor);
+	for (let i = 0; i < xLength; i++) {
+		let 
+			tmp1_x = origin_x + i * xInterval,
+			tmp1_y = origin_y,
+			tmp2_x = tmp1_x,
+			tmp2_y = tmp1_y + 10; // 刻度线10像素
+		drawLine(ctx, tmp1_x, tmp1_y, tmp2_x, tmp2_y, lineWidth, scaleLineColor);
+		if (i === 0 || i === xLength - 1 || i % 6 == 0) {
+			ctx.fillText(data[i].date, tmp1_x - margin, height);
+		}
+	}
+	// 绘制Y轴：刻度线、刻度值
+	//drawLine(ctx, origin_x, origin_y, yMax_x, yMax_y, lineWidth, scaleLineColor);
+	for (let i = 0; i < yLength; i++) {
+		let 
+			tmp1_x = origin_x,
+			tmp1_y = origin_y - i * yInterval,
+			tmp2_x = xMax_x,
+			tmp2_y = tmp1_y;
+		drawDashLine(ctx, tmp1_x, tmp1_y, tmp2_x, tmp2_y, lineWidth, scaleLineColor, 1);
+		ctx.fillText(3000 + i * 200, 0, tmp1_y);
+	}
+	// 绘制K线
+	for (let i = 0; i < data.length; i++) {
+		let 
+			high_x = origin_x + i * xInterval,
+			high_y = origin_y - ((data[i].high - 3000) / 200 * yInterval),
+			low_x = high_x,
+			low_y = origin_y - ((data[i].low - 3000) / 200 * yInterval),
+			open_x = high_x,
+			open_y = origin_y - ((data[i].open - 3000) / 200 * yInterval),
+			close_x = high_x,
+			close_y = origin_y - ((data[i].close - 3000) / 200 * yInterval),
+			color = data[i].open < data[i].close ? sunLineColor : shadeLineColor;
+		drawLine(ctx, high_x, high_y, low_x, low_y, lineWidth, color);
+		drawLine(ctx, open_x, open_y, close_x, close_y, rectWidth, color);
+	}
+};
+window.drawLine = function(ctx, x1, y1, x2, y2, lineWidth, lineColor) {
+	ctx.beginPath();
+	ctx.moveTo(x1, y1);
+	ctx.lineTo(x2, y2);
+	ctx.closePath();
+	ctx.lineWidth = lineWidth;
+	ctx.strokeStyle = lineColor;
+	ctx.stroke();
+}
+window.drawDashLine = function(ctx, x1, y1, x2, y2, lineWidth, lineColor, dashLength) {
+	var 
+	xpos = x2 - x1,
+	ypos = y2 - y1,
+	numDashes = Math.floor(Math.sqrt(xpos * xpos + ypos * ypos) / dashLength);
+	for (let i = 0; i < numDashes; i++) {
+		if (i % 2 === 0) {
+			ctx.moveTo(x1 + (xpos / numDashes) * i, y1 + (ypos / numDashes) * i);
+		} else {
+			ctx.lineTo(x1 + (xpos / numDashes) * i, y1 + (ypos / numDashes) * i);
+		}
+	}
+	ctx.lineWidth = lineWidth;
+	ctx.strokeStyle = lineColor;
+	ctx.stroke();
+}
+
+// 加载最近30个交易日的K线图数据:
+var js = document.createElement('script');
+js.src = 'http://img1.money.126.net/data/hs/kline/day/history/2019/0000001.json?callback=loadStockData&t=' + Date.now();
+document.getElementsByTagName('head')[0].appendChild(js);
+</script>

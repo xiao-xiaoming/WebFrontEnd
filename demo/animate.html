@@ -1,0 +1,20 @@
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<button class="uk-button" onclick="customAnimate();">animate()</button>
+<div id="test-animate" style="width: 128px; height: 128px; background-color: rgb(204, 204, 204); background-repeat: no-repeat; background-position: center center; opacity: 1;"></div>
+
+<script>
+	function customAnimate(){
+		var div = $('#test-animate');
+		div.animate({
+			opacity: 0.25,
+			width: '256px',
+			height: '256px'
+		}, 3000, function () {
+			console.log('动画已结束');
+			// 恢复至初始状态:
+			$(this).css('opacity', '1.0').css('width', '128px').css('height', '128px');
+		});
+	}
+
+</script>

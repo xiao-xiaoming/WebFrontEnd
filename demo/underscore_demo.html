@@ -1,0 +1,36 @@
+<script type="text/javascript" src="https://underscorejs.org/underscore-min.js"></script>
+
+
+<script>
+'use strict';
+
+var factorial = _.memoize(function(n) {
+    console.log('start calculate ' + n + '!...');
+    if (n <= 2) {
+        return n;
+    }
+    return n * factorial(n - 1);
+});
+
+factorial(10);//3628800
+factorial(9);//3628800
+
+var obj = {
+    Adam: 90,
+    Lisa: 85,
+    Bart: 59
+};
+console.log(_.invert(obj));
+<!-- {
+  "name": "小明",
+  "age": 20,
+  "skills": [
+    "JavaScript",
+    "CSS",
+    "HTML"
+  ]
+} -->
+</script>
+
+
+
